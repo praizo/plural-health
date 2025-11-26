@@ -1,0 +1,29 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { NextRequest, NextResponse } from 'next/server';
+import { PatientModel } from '@/lib/db/model/patient';
+import { CreatePatientInput } from '@/lib/types/patient';
+
+export async function GET() {
+    try {
+        const patients = await PatientModel.findAll();
+        return NextResponse.json(patients);
+    } catch (error) {
+        return NextResponse.json(
+            { error: 'Failed to fetch patients' },
+            { status: 500 }
+        );
+    }
+}
+
+export async function POST(request: NextRequest) {
+    try {
+        const body: CreatePatientInput = await request.json();
+        const patient = await PatientModel.create(body);
+        return NextResponse.json(patient, { status: 201 });
+    } catch (error) {
+        return NextResponse.json(
+            { error: 'Failed to create patient' },
+            { status: 500 }
+        );
+    }
+}
