@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Plural Health — Patient & Appointment Management Dashboard
 
-## Getting Started
+A full-stack dashboard application for managing patients and appointments. The app allows users to view appointments, filter/sort them, add new patients, and schedule appointments.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## How to run locally
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1.  **Clone Repo**
+    ```bash
+    git clone <repository-url>
+    cd plural-health
+    ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+2.  **Install dependencies**
+    ```bash
+    npm install
+    ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3.  **Environment Setup**
+    Create a `.env.local` file in the root directory and add your MongoDB connection string:
+    ```env
+    MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/plural-health
+    ```
 
-## Learn More
+4.  **Seed Database**
+    Populate the database with initial dummy data:
+    ```bash
+    npx tsx scripts/seed.ts
+    ```
 
-To learn more about Next.js, take a look at the following resources:
+5.  **Start development server**
+    ```bash
+    npm run dev
+    ```
+    Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Architectural Decisions
 
-## Deploy on Vercel
+*   **Framework:** Used **Next.js (App Router)** to leverage server-side rendering and built-in API routes, keeping the architecture unified.
+*   **Language:** Adopted **TypeScript** for type safety, better developer experience, and maintainability.
+*   **Database:** Chose **MongoDB** for its flexibility with document schemas (Patients/Appointments) and ease of integration with Next.js.
+*   **State Management:** Used **TanStack Query (React Query)** for efficient server state management (caching, loading states, re-fetching).
+*   **Styling:** Used **Tailwind CSS** for rapid, utility-first styling and responsive design.
+*   **Forms:** Implemented **React Hook Form** with **Yup** validation for robust form handling.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Web Routes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Route | Description |
+| :--- | :--- |
+| `/` | **Dashboard**: Main view listing appointments with search, filtering, and actions to add patients/appointments. |
+
+## API Routes
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| **GET** | `/api/appointments` | Fetch all appointments (supports filtering/sorting logic on client side for this demo). |
+| **POST** | `/api/appointments` | Create a new appointment. |
+| **GET** | `/api/patients` | Fetch all patients. |
+| **POST** | `/api/patients` | Create a new patient record. |
+| **GET** | `/api/patients/search` | Search for patients by name or ID. |
+
+## Missing items (Future Improvements)
+
+*   **Authentication:** Implement Auth.js (NextAuth) for secure login/signup.
+*   **Server-side Pagination:** Move pagination logic to the backend for better scalability with large datasets.
+*   **Edit/Delete:** Add functionality to edit or cancel appointments and update patient details.
+*   **Tests:** Add unit and integration tests (Jest/React Testing Library/Playwright).
+
+## Time Spent
+
+*   ~12 hours
