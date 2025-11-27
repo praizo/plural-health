@@ -5,7 +5,7 @@ import "./globals.css";
 import Providers from "./providers";
 import { Toaster } from 'react-hot-toast';
 import { SpeedInsights } from "@vercel/speed-insights/next"
-
+import { Analytics } from "@vercel/analytics/next"
 
 export const metadata: Metadata = {
   title: "Plural Health",
@@ -28,6 +28,7 @@ export default function RootLayout({
           {children}
         </Providers>
         <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );
