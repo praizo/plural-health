@@ -37,8 +37,8 @@ export function useAppointmentsTable(searchQuery: string = '') {
 
   const sortedAppointments = useMemo(() => {
     return [...filteredAppointments].sort((a, b) => {
-      const dateA = new Date(a.scheduledTime).getTime();
-      const dateB = new Date(b.scheduledTime).getTime();
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
       return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
     });
   }, [filteredAppointments, sortOrder]);
