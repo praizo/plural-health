@@ -169,7 +169,7 @@ export function AddPatientModal({ isOpen, onClose, onSuccess }: AddPatientModalP
                     showYearDropdown
                     scrollableYearDropdown
                     yearDropdownItemNumber={100}
-                    maxDate={new Date()}
+                    minDate={new Date()}
                   />
                   <ErrorMessage name="dateOfBirth" component="div" className="text-red-500 text-xs mt-1" />
 
