@@ -1,14 +1,74 @@
-# Plural Health — Patient & Appointment Management Dashboard
+# Plural Health Coding Assessment — Patient & Appointment Dashboard
 
-A full-stack dashboard application for managing patients and appointments. The app allows users to view appointments, filter/sort them, add new patients, and schedule appointments.
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Next.js](https://img.shields.io/badge/Next.js-15.0-black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC)
 
----
+A modern, full-stack healthcare dashboard application built as a coding assessment for Plural Health. Designed to streamline patient and appointment management, it leverages the latest web technologies to provide a seamless experience.
 
-## How to run locally
+## 🚀 Features
 
-1.  **Clone Repo**
+-   **Dashboard Overview**: Real-time view of upcoming appointments and patient statistics.
+-   **Appointment Management**:
+    -   View, filter, and sort appointments by date, clinic, or status.
+    -   Create new appointments with conflict detection.
+    -   Track appointment status (e.g., "Seen doctor", "Processing").
+-   **Patient Management**:
+    -   Register new patients with detailed demographic information.
+    -   Search for patients by name or hospital ID.
+    -   View patient history and details.
+-   **Responsive Design**: Fully optimized for desktop, tablet, and mobile devices.
+-   **Data Persistence**: Robust data storage using MongoDB.
+
+## 🛠️ Tech Stack
+
+-   **Frontend**: [Next.js 15](https://nextjs.org/) (App Router), [React](https://react.dev/), [Tailwind CSS](https://tailwindcss.com/)
+-   **Backend**: Next.js API Routes
+-   **Database**: [MongoDB](https://www.mongodb.com/)
+-   **State Management**: [TanStack Query](https://tanstack.com/query/latest) (React Query)
+-   **Form Handling**: [React Hook Form](https://react-hook-form.com/) + [Yup](https://github.com/jquense/yup)
+-   **Testing**: [Jest](https://jestjs.io/)
+-   **Icons**: Custom SVG assets
+
+## 📂 Project Structure
+
+```bash
+plural-health/
+├── public/              # Static assets (images, icons)
+├── scripts/             # Utility scripts (database seeding)
+├── src/
+│   ├── app/             # Next.js App Router pages and API routes
+│   │   ├── api/         # Backend API endpoints
+│   │   └── ...          # Frontend pages
+│   ├── components/      # Reusable UI components
+│   │   ├── appointments/# Appointment-related components
+│   │   ├── dashboard/   # Dashboard-specific components
+│   │   ├── patients/    # Patient-related components
+│   │   └── ui/          # Generic UI elements (Buttons, Modals, etc.)
+│   ├── lib/             # Utilities, hooks, and types
+│   │   ├── db/          # Database connection and models
+│   │   ├── hooks/       # Custom React hooks
+│   │   └── types/       # TypeScript definitions
+│   └── services/        # API client services
+└── ...config files      # Configuration (Tailwind, TypeScript, Jest, etc.)
+```
+
+## 🏁 Getting Started
+
+Follow these instructions to set up the project locally.
+
+### Prerequisites
+
+-   **Node.js** (v18 or higher)
+-   **npm** or **yarn**
+-   **MongoDB** instance (local or Atlas)
+
+### Installation
+
+1.  **Clone the repository**
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/yourusername/plural-health.git
     cd plural-health
     ```
 
@@ -17,58 +77,56 @@ A full-stack dashboard application for managing patients and appointments. The a
     npm install
     ```
 
-3.  **Environment Setup**
-    Create a `.env.local` file in the root directory and add your MongoDB connection string:
+3.  **Configure Environment Variables**
+    Create a `.env.local` file in the root directory:
     ```env
     MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/plural-health
     ```
 
-4.  **Seed Database**
-    Populate the database with initial dummy data:
+4.  **Seed the Database**
+    Populate your database with initial dummy data:
     ```bash
     npx tsx scripts/seed.ts
     ```
 
-5.  **Start development server**
+5.  **Run the Development Server**
     ```bash
     npm run dev
     ```
-    Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+    Open [http://localhost:3000](http://localhost:3000) in your browser.
 
----
+## 🧪 Running Tests
 
-## Architectural Decisions
+This project uses Jest for unit testing backend logic and services.
 
-*   **Framework:** Used **Next.js (App Router)** to leverage server-side rendering and built-in API routes, keeping the architecture unified.
-*   **Language:** Adopted **TypeScript** for type safety, better developer experience, and maintainability.
-*   **Database:** Chose **MongoDB** for its flexibility with document schemas (Patients/Appointments) and ease of integration with Next.js.
-*   **State Management:** Used **TanStack Query (React Query)** for efficient server state management (caching, loading states, re-fetching).
-*   **Styling:** Used **Tailwind CSS** for rapid, utility-first styling and responsive design.
-*   **Forms:** Implemented **React Hook Form** with **Yup** validation for robust form handling.
+```bash
+# Run all tests
+npm test
 
-## Web Routes
+# Run tests in watch mode
+npm test -- --watch
+```
 
-| Route | Description |
-| :--- | :--- |
-| `/` | **Dashboard**: Main view listing appointments with search, filtering, and actions to add patients/appointments. |
+## 🔌 API Documentation
 
-## API Routes
+### Appointments
 
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| **GET** | `/api/appointments` | Fetch all appointments (supports filtering/sorting logic on client side for this demo). |
-| **POST** | `/api/appointments` | Create a new appointment. |
-| **GET** | `/api/patients` | Fetch all patients. |
-| **POST** | `/api/patients` | Create a new patient record. |
-| **GET** | `/api/patients/search` | Search for patients by name or ID. |
+-   `GET /api/appointments`: Retrieve all appointments.
+-   `POST /api/appointments`: Create a new appointment.
 
-## Missing items (Future Improvements)
+### Patients
 
-*   **Authentication:** Implement Auth.js (NextAuth) for secure login/signup.
-*   **Server-side Pagination:** Move pagination logic to the backend for better scalability with large datasets.
-*   **Edit/Delete:** Add functionality to edit or cancel appointments and update patient details.
-*   **Tests:** Add unit and integration tests (Jest/React Testing Library/Playwright).
+-   `GET /api/patients`: Retrieve all patients.
+-   `POST /api/patients`: Register a new patient.
+-   `GET /api/patients/search?q={query}`: Search patients by name or ID.
 
-## Time Spent
+## 🔮 Future Improvements
 
-*   ~12 hours
+-   **Authentication**: Implement secure user authentication (e.g., NextAuth.js).
+-   **Server-Side Pagination**: Optimize data fetching for large datasets.
+-   **E2E Testing**: Add Cypress or Playwright for end-to-end testing.
+-   **Dark Mode**: Add theming support.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

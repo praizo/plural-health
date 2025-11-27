@@ -6,12 +6,7 @@ import "./globals.css";
 import Providers from "./providers";
 import { Toaster } from 'react-hot-toast';
 
-// const questrial = Questrial({
-//   weight: "400",
-//   variable: "--font-questrial",
-//   subsets: ["latin"],
-// });
-
+ 
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -25,6 +20,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
       <body
         className={`${gilroy.variable} antialiased`}
       >

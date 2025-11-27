@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { NextRequest, NextResponse } from 'next/server';
+ import { NextRequest, NextResponse } from 'next/server';
 import { PatientModel } from '@/lib/db/model/patient';
 import { CreatePatientInput } from '@/lib/types/patient';
 
