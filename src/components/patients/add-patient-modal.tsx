@@ -172,7 +172,7 @@ export function AddPatientModal({ isOpen, onClose, onSuccess }: AddPatientModalP
                     name="dateOfBirth"
                     placeholder="Date of birth *"
                     value={values.dateOfBirth instanceof Date ? values.dateOfBirth.toISOString().split('T')[0] : values.dateOfBirth}
-                    className={`w-full px-3 py-2 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D7E3FC] cursor-pointer ${touched.phoneNumber && errors.phoneNumber ? 'border-red-500' : 'border-gray-300'}`}
+                    className={`w-full min-w-0 px-3 py-2 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D7E3FC] cursor-pointer ${touched.dateOfBirth && errors.dateOfBirth ? 'border-red-500' : 'border-gray-300'}`}
                   />
                   <ErrorMessage name="dateOfBirth" component="div" className="text-red-500 text-xs mt-1" />
 
