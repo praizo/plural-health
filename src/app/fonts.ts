@@ -4,27 +4,27 @@ import localFont from 'next/font/local'
 const gilroy = localFont({
   src: [
     {
-      path: './fonts/gilroy-light.ttf',
+      path: './fonts/Gilroy-Light.ttf',
       weight: '300',
       style: 'normal',
     },
     {
-      path: './fonts/gilroy-regular.ttf',
+      path: './fonts/Gilroy-Regular.ttf',
       weight: '400',
       style: 'normal',
     },
     {
-      path: './fonts/gilroy-medium.ttf',
+      path: './fonts/Gilroy-Medium.ttf',
       weight: '500',
       style: 'normal',
     },
     {
-      path: './fonts/gilroy-bold.ttf',
+      path: './fonts/Gilroy-Bold.ttf',
       weight: '700',
       style: 'normal',
     },
     {
-      path: './fonts/gilroy-heavy.ttf',
+      path: './fonts/Gilroy-Heavy.ttf',
       weight: '800',      
       style: 'normal',
     },

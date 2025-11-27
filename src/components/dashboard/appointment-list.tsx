@@ -131,9 +131,9 @@ export function AppointmentList() {
                       <Image 
                         src={['/images/scan-green.svg', '/images/scan-red.svg', '/images/scan-yello.svg'][index % 3]} 
                         alt="Scan record" 
-                        width={36} 
-                        height={36} 
-                        className="w-9 h-9"
+                        width={32} 
+                        height={32} 
+                        className="w-8 h-8"
                       />
                     )}
                  </div>
