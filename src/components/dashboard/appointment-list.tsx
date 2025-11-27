@@ -70,8 +70,12 @@ export function AppointmentList() {
           <div className="flex items-center gap-2 text-gray-500 text-sm">
             <span>1 - 20 of 197</span>
             <div className="flex gap-1 cursor-pointer">
-              <button className="p-1 hover:bg-gray-100 rounded" aria-label="Previous page"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg></button>
-              <button className="p-1 hover:bg-gray-100 rounded" aria-label="Next page"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg></button>
+              <button className="p-1 hover:bg-gray-100 rounded" aria-label="Previous page">
+                <Image src="/images/chevron-left-small.svg" alt="Previous" width={16} height={16} />
+              </button>
+              <button className="p-1 hover:bg-gray-100 rounded" aria-label="Next page">
+                <Image src="/images/chevron-right-small.svg" alt="Next" width={16} height={16} />
+              </button>
             </div>
           </div>
         </div>
@@ -106,7 +110,7 @@ export function AppointmentList() {
 
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center text-gray-600 ${apt.patient.avatarColor}`}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                    <Image src="/images/user.svg" alt="User" width={20} height={20} />
                   </div>
                   <div className='space-y-1.5'>
                     <div className="font-semibold text-[#051438] text-base leading-4 tracking-0">{apt.patient.name}</div>
@@ -160,7 +164,7 @@ export function AppointmentList() {
 
                 <div className="pr-6 flex justify-end">
                   <button className="text-gray-400 hover:text-gray-600" aria-label="More options">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1" /><circle cx="12" cy="5" r="1" /><circle cx="12" cy="19" r="1" /></svg>
+                    <Image src="/images/more-vertical.svg" alt="More" width={16} height={16} />
                   </button>
                 </div>
               </div>

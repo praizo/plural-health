@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Appointment, CreateAppointmentInput } from '@/lib/types/appointment';
-import { appointmentService } from '@/services/appointments';
+ import { appointmentService } from '@/services/appointments';
 
 export const useAppointments = () => {
   return useQuery({

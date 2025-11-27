@@ -21,6 +21,12 @@ export async function GET() {
 export async function POST(request: NextRequest) {
     try {
         const body: CreatePatientInput = await request.json();
+        
+        // Ensure dateOfBirth is a Date object
+        if (typeof body.dateOfBirth === 'string') {
+            body.dateOfBirth = new Date(body.dateOfBirth);
+        }
+
         const patient = await PatientModel.create(body);
         return NextResponse.json(patient, { status: 201 });
     } catch (error) {

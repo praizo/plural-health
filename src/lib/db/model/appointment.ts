@@ -95,9 +95,10 @@ export class AppointmentModel {
     return result as Appointment | null;
   }
 
-  private static calculateAge(dateOfBirth: Date): string {
+  private static calculateAge(dateOfBirth: Date | string): string {
+    const dob = typeof dateOfBirth === 'string' ? new Date(dateOfBirth) : dateOfBirth;
     const now = new Date();
-    const diff = now.getTime() - dateOfBirth.getTime();
+    const diff = now.getTime() - dob.getTime();
     const ageDate = new Date(diff);
     const years = Math.abs(ageDate.getUTCFullYear() - 1970);
     const months = ageDate.getUTCMonth();

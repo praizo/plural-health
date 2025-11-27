@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import gilroy from './fonts'
 import "./globals.css";
 import Providers from "./providers";
+import { Toaster } from 'react-hot-toast';
 
 // const questrial = Questrial({
 //   weight: "400",
@@ -28,6 +29,7 @@ export default function RootLayout({
         className={`${gilroy.variable} antialiased`}
       >
         <Providers>
+          <Toaster position="top-right" />
           {children}
         </Providers>
       </body>
