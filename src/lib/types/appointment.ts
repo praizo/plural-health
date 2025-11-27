@@ -7,7 +7,7 @@ export type AppointmentStatus =
   | 'Transferred to A&E'
   | 'Seen doctor';
 
-export type AppointmentType = 'New' | 'Follow-up' | 'Emergency';
+export type AppointmentType = 'New' | 'Follow-up' | 'Emergency' | 'Walk-in' | 'Referral' | 'Consult' | 'Medical Exam';
 
 export interface Appointment {
   _id: string;

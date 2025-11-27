@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
@@ -11,286 +11,398 @@ import { Formik, Form, Field, ErrorMessage, FieldProps } from 'formik';
 import * as Yup from 'yup';
 import { useCreateAppointment } from '@/lib/hooks/use-appointments';
 import toast from 'react-hot-toast';
-import { CreateAppointmentInput, AppointmentType } from '@/lib/types/appointment';
+import { CreateAppointmentInput } from '@/lib/types/appointment';
 
 interface CreateAppointmentModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+    isOpen: boolean;
+    onClose: () => void;
 }
 
 const validationSchema = Yup.object({
-  patientId: Yup.string().required('Patient is required'),
-  clinic: Yup.string().required('Clinic is required'),
-  title: Yup.string().required('Appointment type is required'),
-  scheduledTime: Yup.date().required('Date and time is required'),
+    patientId: Yup.string().required('Patient is required'),
+    clinic: Yup.string().required('Clinic is required'),
+    title: Yup.string().required('Appointment type is required'),
+    scheduledTime: Yup.date()
+        .required('Date and time is required')
+        .test('future', 'Appointment time cannot be in the past', (value) => {
+            if (!value) return true;
+            return new Date(value) >= new Date();
+        }),
 });
 
 const CLINICS = [
-  "Accident and Emergency",
-  "Neurology",
-  "Cardiology",
-  "Gastroenterology",
-  "Renal"
+    "Accident and Emergency",
+    "Neurology",
+    "Cardiology",
+    "Gastroenterology",
+    "Renal"
 ];
 
-const APPOINTMENT_TYPES: { label: string; value: AppointmentType }[] = [
-  { label: 'New (Walk-in)', value: 'New' },
-  { label: 'Follow-up', value: 'Follow-up' },
-  { label: 'Emergency', value: 'Emergency' },
+const APPOINTMENT_TYPE_GROUPS = [
+    {
+        title: 'New (Walk-in, Referral, Consult)',
+        items: [
+            { label: 'Walk-in', value: 'Walk-in', type: 'Walk-in' },
+            { label: 'Referral', value: 'Referral', type: 'Referral' },
+            { label: 'Consult', value: 'Consult', type: 'Consult' },
+        ]
+    },
+    {
+        title: 'Follow-up',
+        items: [
+            { label: 'Follow-up', value: 'Follow-up', type: 'Follow-up' }
+        ]
+    },
+    {
+        title: 'For Medical Exam',
+        items: [
+            { label: 'For Medical Exam', value: 'Medical Exam', type: 'Medical Exam' }
+        ]
+    }
 ];
 
 export function CreateAppointmentModal({ isOpen, onClose }: CreateAppointmentModalProps) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [showPatientResults, setShowPatientResults] = useState(false);
-  
-  const createAppointmentMutation = useCreateAppointment();
+    const [searchQuery, setSearchQuery] = useState('');
+    const [clinicSearch, setClinicSearch] = useState('');
+    const [activeDropdown, setActiveDropdown] = useState<'clinic' | 'appointmentType' | null>(null);
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [showPatientResults, setShowPatientResults] = useState(false);
+    const timeInputRef = useRef<HTMLInputElement>(null);
 
-  const { data: searchResults } = useQuery({
-    queryKey: ['patients', 'search', searchQuery],
-    queryFn: () => patientService.search(searchQuery),
-    enabled: searchQuery.length > 2,
-  });
+    const createAppointmentMutation = useCreateAppointment();
 
-  const daysInMonth = eachDayOfInterval({
-    start: startOfMonth(currentDate),
-    end: endOfMonth(currentDate),
-  });
+    const { data: searchResults } = useQuery({
+        queryKey: ['patients', 'search', searchQuery],
+        queryFn: () => patientService.search(searchQuery),
+        enabled: searchQuery.length > 3,
+    });
 
-  const startDay = getDay(startOfMonth(currentDate));
-  const emptyDays = Array(startDay).fill(null);
+    const daysInMonth = eachDayOfInterval({
+        start: startOfMonth(currentDate),
+        end: endOfMonth(currentDate),
+    });
 
-  const initialValues: CreateAppointmentInput = {
-    patientId: '',
-    clinic: '',
-    title: '',
-    scheduledTime: new Date(),
-    appointmentType: 'New',
-    doesNotRepeat: true,
-  };
+    const startDay = getDay(startOfMonth(currentDate));
+    const emptyDays = Array(startDay).fill(null);
 
-  return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="Add new appointment"
-      className="max-w-[600px]"
-    >
-      <Formik
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={(values, { setSubmitting, resetForm }) => {
-            createAppointmentMutation.mutate(values, {
-                onSuccess: () => {
-                    toast.success('Appointment created successfully');
-                    onClose();
-                    resetForm();
-                    setSearchQuery('');
-                },
-                onError: (error) => {
-                    console.error('Failed to create appointment:', error);
-                    toast.error('Failed to create appointment');
-                },
-                onSettled: () => {
-                    setSubmitting(false);
-                }
-            });
-        }}
-      >
-        {({ values, setFieldValue, isSubmitting, errors, touched }) => (
-          <Form className="space-y-6">
-            {/* Patient Search */}
-            <div className="relative">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Find patient"
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setShowPatientResults(true);
-                    if (e.target.value === '') {
-                        setFieldValue('patientId', '');
-                    }
-                  }}
-                  className={`w-full pl-10 pr-10 py-3 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B0C7D] ${touched.patientId && errors.patientId ? 'border-red-500' : 'border-gray-200'}`}
-                />
-                <div className="absolute left-3 top-1/2 -translate-y-1/2">
-                  <Image src="/images/search.svg" alt="Search" width={20} height={20} className="text-gray-400" />
-                </div>
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex gap-2">
-                    <Image src="/images/filter.svg" alt="filter" width={20} height={20} />
-                </div>
-              </div>
-              <ErrorMessage name="patientId" component="div" className="text-red-500 text-xs mt-1" />
+    const initialValues: CreateAppointmentInput = {
+        patientId: '',
+        clinic: '',
+        title: '',
+        scheduledTime: new Date(),
+        appointmentType: 'New',
+        doesNotRepeat: true,
+    };
 
-              {/* Search Results Dropdown */}
-              {showPatientResults && searchResults && searchResults.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-100 z-10 max-h-60 overflow-y-auto">
-                  {searchResults.map((patient) => (
-                    <div
-                      key={patient._id}
-                      onClick={() => {
-                        setFieldValue('patientId', patient._id);
-                        setSearchQuery(`${patient.firstName} ${patient.lastName}`);
-                        setShowPatientResults(false);
-                      }}
-                      className="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-50 last:border-0"
-                    >
-                      <div className="font-medium text-[#051438]">{patient.firstName} {patient.lastName}</div>
-                      <div className="text-xs text-gray-500">{patient.hospitalId}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+    const handleClose = () => {
+        setActiveDropdown(null);
+        onClose();
+    };
 
-            {/* Form Fields */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between py-3 border-b border-gray-100">
-                <span className="text-[#667085]">Clinic</span>
-                <Field as="select" name="clinic" className="flex items-center gap-2 font-semibold text-[#051438] bg-transparent border-none focus:ring-0 text-right dir-rtl">
-                    <option value="">Select Clinic</option>
-                    {CLINICS.map(clinic => (
-                        <option key={clinic} value={clinic}>{clinic}</option>
-                    ))}
-                </Field>
-              </div>
-              <ErrorMessage name="clinic" component="div" className="text-red-500 text-xs" />
-              
-              <div className="flex items-center justify-between py-3 border-b border-gray-100">
-                <span className="text-[#667085]">Title</span>
-                <Field as="select" name="title" className="flex items-center gap-2 font-semibold text-[#051438] bg-transparent border-none focus:ring-0 text-right">
-                    <option value="">Select Type</option>
-                    {APPOINTMENT_TYPES.map(type => (
-                        <option key={type.value} value={type.label}>{type.label}</option>
-                    ))}
-                </Field>
-              </div>
-              <ErrorMessage name="title" component="div" className="text-red-500 text-xs" />
+    return (
+        <Modal
+            isOpen={isOpen}
+            onClose={handleClose}
+            title="Add new appointment"
+            className="max-w-[600px]"
+        >
+            <Formik
+                initialValues={initialValues}
+                validationSchema={validationSchema}
+                onSubmit={(values, { setSubmitting, resetForm }) => {
+                    createAppointmentMutation.mutate(values, {
+                        onSuccess: () => {
+                            toast.success('Appointment created successfully');
+                            onClose();
+                            resetForm();
+                            setSearchQuery('');
+                            setActiveDropdown(null);
+                        },
+                        onError: (error) => {
+                            console.error('Failed to create appointment:', error);
+                            toast.error('Failed to create appointment');
+                        },
+                        onSettled: () => {
+                            setSubmitting(false);
+                        }
+                    });
+                }}
+            >
+                {({ values, setFieldValue, isSubmitting, errors, touched }) => (
+                    <Form className="space-y-6">
+                        {/* Patient Search */}
+                        <div className="relative">
+                            <div className="relative py-2">
+                                <input
+                                    type="text"
+                                    placeholder="Find patient by name or ID"
+                                    value={searchQuery}
+                                    onChange={(e) => {
+                                        setSearchQuery(e.target.value);
+                                        setShowPatientResults(true);
+                                        if (e.target.value === '') {
+                                            setFieldValue('patientId', '');
+                                        }
+                                    }}
+                                    className={`w-full pl-10 pr-10 py-3 bg-white border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#D7E3FC] ${touched.patientId && errors.patientId ? 'border-red-500' : 'border-gray-200'}`}
+                                />
+                                <div className="absolute left-3 top-1/2 -translate-y-1/2">
+                                    <Image src="/images/search.svg" alt="Search" width={20} height={20} className="text-gray-400" />
+                                </div>
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex gap-2">
+                                    <Image src="/images/filter.svg" alt="filter" width={20} height={20} />
+                                </div>
+                            </div>
+                            <ErrorMessage name="patientId" component="div" className="text-red-500 text-xs mt-1" />
 
-              <div className="flex items-center justify-between py-3 bg-[#F5F6FA] -mx-8 px-8">
-                <span className="text-[#667085]">Time</span>
-                <div className="flex items-center gap-2">
-                    <span className="font-semibold text-[#051438]">{format(values.scheduledTime, 'd MMM yyyy')}</span>
-                    <input
-                        id="time-input"
-                        type="time"
-                        value={format(values.scheduledTime, 'HH:mm')}
-                        onChange={(e) => {
-                            if (!e.target.value) return;
-                            const [hours, minutes] = e.target.value.split(':').map(Number);
-                            const newDate = set(values.scheduledTime, { hours, minutes });
-                            setFieldValue('scheduledTime', newDate);
-                        }}
-                        className="bg-transparent border-none focus:ring-0 p-0 font-semibold text-[#051438] cursor-pointer"
-                    />
-                </div>
-              </div>
-            </div>
+                            {/* Search Results Dropdown */}
+                            {showPatientResults && searchResults && searchResults.length > 0 && (
+                                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-100 z-10 max-h-60 overflow-y-auto">
+                                    {searchResults.map((patient) => (
+                                        <div
+                                            key={patient._id}
+                                            onClick={() => {
+                                                setFieldValue('patientId', patient._id);
+                                                setSearchQuery(`${patient.firstName} ${patient.lastName} - ${patient.hospitalId}`);
+                                                setShowPatientResults(false);
+                                            }}
+                                            className="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-50 last:border-0"
+                                        >
+                                            <div className="font-medium text-[#051438]">{patient.firstName} {patient.lastName}</div>
+                                            <div className="text-xs text-gray-500">{patient.hospitalId}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
 
-            {/* Calendar */}
-            <div className="bg-[#5B6587] rounded-xl p-6 text-white">
-              <div className="flex items-center justify-between mb-6">
-                <button type="button" className="p-1 hover:bg-white/10 rounded" title="Calendar options">
-                  <Image src="/images/list.svg" alt="List" width={20} height={20} />
-                </button>
-                
-                <div className="flex items-center gap-4">
-                  <button type="button" onClick={() => setCurrentDate(subMonths(currentDate, 1))} title="Previous month">
-                    <Image src="/images/chevron-left.svg" alt="Previous Month" width={20} height={20} />
-                  </button>
-                  <span className="font-semibold">{format(currentDate, 'MMMM yyyy')}</span>
-                  <button type="button" onClick={() => setCurrentDate(addMonths(currentDate, 1))} title="Next month">
-                    <Image src="/images/chevron-right.svg" alt="Next Month" width={20} height={20} />
-                  </button>
-                </div>
+                        {/* Form Fields */}
+                        <div className="space-y-4 divide-y-2 divide-[#CDD8F3]">
+                            <div className="relative">
+                                <div
+                                    className="flex items-center justify-between py-3 border-b border-gray-100 cursor-pointer"
+                                    onClick={() => setActiveDropdown(activeDropdown === 'clinic' ? null : 'clinic')}
+                                >
+                                    <span className="text-base leading-[100%] font-medium text-[#677597]">Clinic</span>
+                                    <div className="flex items-center gap-2 font-semibold leading-[100%] text-base text-[#051438]">
+                                        {values.clinic || 'Clinic'}
+                                        <Image src="/images/chevron-right.svg" alt="Select" width={16} height={16} className={`transition-transform ${activeDropdown === 'clinic' ? 'rotate-90' : ''}`} />
+                                    </div>
+                                </div>
+                                <ErrorMessage name="clinic" component="div" className="text-red-500 text-xs" />
 
-                <button 
-                    type="button" 
-                    className="p-1 hover:bg-white/10 rounded" 
-                    title="Set time"
-                    onClick={() => (document.getElementById('time-input') as HTMLInputElement)?.showPicker()}
-                >
-                  <Image src="/images/clock.svg" alt="Clock" width={20} height={20} />
-                </button>
-              </div>
+                                {activeDropdown === 'clinic' && (
+                                    <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-100 z-20 p-4 max-h-80 overflow-y-auto">
+                                        <div className="relative mb-3">
+                                            <input
+                                                type="text"
+                                                placeholder="Search clinic"
+                                                value={clinicSearch}
+                                                onChange={e => setClinicSearch(e.target.value)}
+                                                className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D7E3FC] text-sm"
+                                                autoFocus
+                                                onClick={(e) => e.stopPropagation()}
+                                            />
+                                            <div className="absolute left-3 top-1/2 -translate-y-1/2">
+                                                <Image src="/images/search.svg" alt="Search" width={16} height={16} className="text-gray-400" />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-1">
+                                            {CLINICS.filter(c => c.toLowerCase().includes(clinicSearch.toLowerCase())).map(clinic => (
+                                                <div
+                                                    key={clinic}
+                                                    onClick={() => { setFieldValue('clinic', clinic); setActiveDropdown(null); }}
+                                                    className={`p-2 hover:bg-gray-50 cursor-pointer rounded-lg font-medium text-[#051438] text-sm ${values.clinic === clinic ? 'bg-blue-50' : ''}`}
+                                                >
+                                                    {clinic}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
 
-              <div className="grid grid-cols-7 text-center text-xs mb-4 opacity-70">
-                <div>S</div>
-                <div>M</div>
-                <div>T</div>
-                <div>W</div>
-                <div>T</div>
-                <div>F</div>
-                <div>S</div>
-              </div>
+                            <div className="relative">
+                                <div
+                                    className="flex items-center justify-between py-3 border-b border-gray-100 cursor-pointer"
+                                    onClick={() => setActiveDropdown(activeDropdown === 'appointmentType' ? null : 'appointmentType')}
+                                >
+                                    <span className="text-base leading-[100%] font-medium text-[#677597]">Appointment type</span>
+                                    <div className="flex items-center gap-2 font-semibold leading-[100%] text-base text-[#051438]">
+                                        {values.title || 'Appointment Type'}
+                                        <Image src="/images/chevron-right.svg" alt="Select" width={16} height={16} className={`transition-transform ${activeDropdown === 'appointmentType' ? 'rotate-90' : ''}`} />
+                                    </div>
+                                </div>
+                                <ErrorMessage name="title" component="div" className="text-red-500 text-xs" />
 
-              <div className="grid grid-cols-7 gap-y-4 text-center text-sm">
-                {emptyDays.map((_, i) => <div key={`empty-${i}`} />)}
-                {daysInMonth.map((day) => (
-                  <button
-                    key={day.toString()}
-                    type="button"
-                    onClick={() => {
-                        // Preserve the time, just change the date
-                        const newDate = set(day, { 
-                            hours: values.scheduledTime.getHours(), 
-                            minutes: values.scheduledTime.getMinutes() 
-                        });
-                        setFieldValue('scheduledTime', newDate);
-                    }}
-                    className={`w-8 h-8 rounded-full flex items-center justify-center mx-auto transition-colors
+                                {/* Appointment Type Dropdown */}
+                                {activeDropdown === 'appointmentType' && (
+                                    <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-100 z-20 p-4 max-h-80 overflow-y-auto">
+                                        <div className="space-y-4">
+                                            {APPOINTMENT_TYPE_GROUPS.map((group, idx) => (
+                                                <div key={idx}>
+                                                    <h3 className="text-xs font-semibold text-[#677597] uppercase mb-2">{group.title}</h3>
+                                                    <div className="space-y-1">
+                                                        {group.items.map(item => (
+                                                            <div
+                                                                key={item.value}
+                                                                onClick={() => {
+                                                                    setFieldValue('title', item.label);
+                                                                    setFieldValue('appointmentType', item.type);
+                                                                    setActiveDropdown(null);
+                                                                }}
+                                                                className={`flex items-center justify-between p-2 rounded-lg cursor-pointer ${values.title === item.label ? 'bg-[#EBF3FF]' : 'hover:bg-gray-50'}`}
+                                                            >
+                                                                <span className="font-medium text-[#051438] text-sm">{item.label}</span>
+                                                                {values.title === item.label && (
+                                                                    <div className="text-[#0B0C7D]">
+                                                                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                            <path d="M16.6666 5L7.49992 14.1667L3.33325 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                                        </svg>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="flex items-center justify-between py-3  ">
+                                <span className="text-base leading-[100%] font-medium text-[#677597]">Time</span>
+                                <div className="flex items-center gap-2">
+                                    <span className="font-semibold text-[#051438]">{format(values.scheduledTime, 'd MMM yyyy')}</span>
+                                    <input
+                                        ref={timeInputRef}
+                                        id="time-input"
+                                        type="time"
+                                        value={format(values.scheduledTime, 'HH:mm')}
+                                        onChange={(e) => {
+                                            if (!e.target.value) return;
+                                            const [hours, minutes] = e.target.value.split(':').map(Number);
+                                            const newDate = set(values.scheduledTime, { hours, minutes });
+                                            setFieldValue('scheduledTime', newDate);
+                                        }}
+                                        className="bg-transparent border-none focus:ring-0 p-0 font-semibold text-[#051438] cursor-pointer"
+                                    />
+                                </div>
+                            </div>
+                            <ErrorMessage name="scheduledTime" component="div" className="text-red-500 text-xs" />
+                        </div>
+
+                        {/* Calendar */}
+                        <div className="bg-[#5B6587] rounded-xl p-6 text-white">
+                            <div className="flex items-center justify-between mb-6">
+                                <button type="button" className="p-1 hover:bg-white/10 rounded cursor-pointer" title="Calendar options">
+                                    <Image src="/images/list.svg" alt="List" width={20} height={20} />
+                                </button>
+
+                                <div className="flex items-center gap-4">
+                                    <button type="button" onClick={() => setCurrentDate(subMonths(currentDate, 1))} title="Previous month" className="cursor-pointer">
+                                        <Image src="/images/chevron-left.svg" alt="Previous Month" width={20} height={20} />
+                                    </button>
+                                    <span className="font-semibold">{format(currentDate, 'MMMM yyyy')}</span>
+                                    <button type="button" onClick={() => setCurrentDate(addMonths(currentDate, 1))} title="Next month" className="cursor-pointer">
+                                        <Image src="/images/chevron-right.svg" alt="Next Month" width={20} height={20} />
+                                    </button>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    className="p-1 hover:bg-white/10 rounded cursor-pointer"
+                                    title="Set time"
+                                    onClick={() => {
+                                        const input = timeInputRef.current;
+                                        if (input) {
+                                            if (typeof input.showPicker === 'function') {
+                                                input.showPicker();
+                                            } else {
+                                                input.focus();
+                                            }
+                                        }
+                                    }}
+                                >
+                                    <Image src="/images/clock.svg" alt="Clock" width={20} height={20} />
+                                </button>
+                            </div>
+
+                            <div className="grid grid-cols-7 text-center text-xs mb-4 opacity-70">
+                                <div>S</div>
+                                <div>M</div>
+                                <div>T</div>
+                                <div>W</div>
+                                <div>T</div>
+                                <div>F</div>
+                                <div>S</div>
+                            </div>
+
+                            <div className="grid grid-cols-7 gap-y-4 text-center text-sm">
+                                {emptyDays.map((_, i) => <div key={`empty-${i}`} />)}
+                                {daysInMonth.map((day) => (
+                                    <button
+                                        key={day.toString()}
+                                        type="button"
+                                        onClick={() => {
+                                            const newDate = set(day, {
+                                                hours: values.scheduledTime.getHours(),
+                                                minutes: values.scheduledTime.getMinutes()
+                                            });
+                                            setFieldValue('scheduledTime', newDate);
+                                        }}
+                                        className={`w-8 h-8 rounded-full flex items-center justify-center mx-auto transition-colors cursor-pointer
                       ${isSameDay(day, values.scheduledTime) ? 'bg-[#8B95B5] text-white font-bold' : 'hover:bg-white/10'}
                       ${!isSameMonth(day, currentDate) ? 'opacity-30' : ''}
                     `}
-                  >
-                    {format(day, 'd')}
-                  </button>
-                ))}
-              </div>
-            </div>
+                                    >
+                                        {format(day, 'd')}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
 
-            {/* Footer */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between py-2">
-                <span className="text-[#667085] font-medium">Repeat</span>
-                <Field name="doesNotRepeat">
-                  {({ field, form }: FieldProps) => (
-                    <select
-                      {...field}
-                      value={field.value ? 'true' : 'false'}
-                      onChange={e => form.setFieldValue('doesNotRepeat', e.target.value === 'true')}
-                      className="flex items-center gap-2 font-semibold text-[#051438] bg-transparent border-none focus:ring-0 text-right cursor-pointer"
-                    >
-                      <option value="true">Does not repeat</option>
-                      <option value="false">Repeats</option>
-                    </select>
-                  )}
-                </Field>
-              </div>
+                        {/* Footer */}
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between py-2">
+                                <span className="text-base leading-[100%] font-medium text-[#677597]">Repeat</span>
+                                <Field name="doesNotRepeat">
+                                    {({ field, form }: FieldProps) => (
+                                        <select
+                                            {...field}
+                                            value={field.value ? 'true' : 'false'}
+                                            onChange={e => form.setFieldValue('doesNotRepeat', e.target.value === 'true')}
+                                            className="flex items-center gap-2 font-semibold text-[#051438] bg-transparent border-none focus:ring-0 text-right cursor-pointer"
+                                        >
+                                            <option value="true">Does not repeat</option>
+                                            <option value="false">Repeats</option>
+                                        </select>
+                                    )}
+                                </Field>
+                            </div>
 
-              <div className="flex justify-end gap-4 pt-2">
-                <Button 
-                  type="button"
-                  onClick={onClose}
-                  variant="outline"
-                  className="px-6 py-2.5 rounded-lg"
-                >
-                  Save & Close
-                </Button>
-                <Button 
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="px-6 py-2.5 rounded-lg"
-                >
-                  {isSubmitting ? 'Creating...' : 'Create Appointment'}
-                </Button>
-              </div>
-            </div>
-          </Form>
-        )}
-      </Formik>
-    </Modal>
-  );
+                            <div className="flex md:flex-row flex-col justify-end gap-4 pt-2">
+                                <Button
+                                    type="button"
+                                    onClick={onClose}
+                                    variant="outline"
+                                    className="px-6 py-2.5 rounded-lg"
+                                >
+                                    Save & Close
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                    className="px-6 py-2.5 rounded-lg"
+                                >
+                                    {isSubmitting ? 'Creating...' : 'Create Appointment'}
+                                </Button>
+                            </div>
+                        </div>
+                    </Form>
+                )}
+            </Formik>
+        </Modal>
+    );
 }

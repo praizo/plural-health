@@ -117,17 +117,25 @@ export class AppointmentModel {
     // Base prices for different clinics
     const basePrices: { [key: string]: number } = {
       'neurology': 90000,
-      'ent': 120000,
-      'emergency': 100000
+      'cardiology': 150000,
+      'gastroenterology': 120000,
+      'renal': 110000,
+      'accident and emergency': 100000,
+      'general': 50000
     };
 
     const multipliers: { [key: string]: number } = {
       'New': 1.0,
       'Follow-up': 0.8,
-      'Emergency': 1.5
+      'Emergency': 1.5,
+      'Walk-in': 1.0,
+      'Referral': 1.0,
+      'Consult': 1.2,
+      'Medical Exam': 1.0
     };
 
-    const basePrice = basePrices[clinic] || 100000;
+    const normalizedClinic = clinic.toLowerCase();
+    const basePrice = basePrices[normalizedClinic] || 100000;
     const multiplier = multipliers[type] || 1.0;
     
     return Math.round(basePrice * multiplier);
