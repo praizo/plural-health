@@ -164,6 +164,7 @@ export function AddPatientModal({ isOpen, onClose, onSuccess }: AddPatientModalP
                     onChange={(date) => setFieldValue('dateOfBirth', date)}
                     placeholderText="Date of birth *"
                     className={`w-full px-3 py-2 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D7E3FC] cursor-pointer ${touched.dateOfBirth && errors.dateOfBirth ? 'border-red-500' : 'border-gray-300'}`}
+                    wrapperClassName="w-full"
                     dateFormat="dd/MM/yyyy"
                     showYearDropdown
                     scrollableYearDropdown
