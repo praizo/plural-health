@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
-// import { Questrial } from "next/font/google";
-
+ 
 import gilroy from './fonts'
 import "./globals.css";
 import Providers from "./providers";
 import { Toaster } from 'react-hot-toast';
-
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 
 export const metadata: Metadata = {
@@ -28,6 +27,7 @@ export default function RootLayout({
           <Toaster position="top-right" />
           {children}
         </Providers>
+        <SpeedInsights />
       </body>
     </html>
   );
