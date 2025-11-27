@@ -8,58 +8,20 @@ import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterv
 import { useQuery } from '@tanstack/react-query';
 import { patientService } from '@/services/patients';
 import { Formik, Form, Field, ErrorMessage, FieldProps } from 'formik';
-import * as Yup from 'yup';
 import { useCreateAppointment } from '@/lib/hooks/use-appointments';
 import toast from 'react-hot-toast';
 import { CreateAppointmentInput } from '@/lib/types/appointment';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+import { appointmentValidationSchema } from '@/lib/schemas/appointment';
+import { CLINICS, APPOINTMENT_TYPE_GROUPS } from '@/lib/constants/appointments';
 
 interface CreateAppointmentModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const validationSchema = Yup.object({
-  patientId: Yup.string().required('Patient is required'),
-  clinic: Yup.string().required('Clinic is required'),
-  title: Yup.string().required('Appointment type is required'),
-  scheduledTime: Yup.date()
-    .required('Date and time is required')
-    .test('future', 'Appointment time cannot be in the past', (value) => {
-      if (!value) return true;
-      return new Date(value) >= new Date();
-    }),
-});
 
-const CLINICS = [
-  "Accident and Emergency",
-  "Neurology",
-  "Cardiology",
-  "Gastroenterology",
-  "Renal"
-];
-
-const APPOINTMENT_TYPE_GROUPS = [
-  {
-    title: 'New (Walk-in, Referral, Consult)',
-    items: [
-      { label: 'Walk-in', value: 'Walk-in', type: 'Walk-in' },
-      { label: 'Referral', value: 'Referral', type: 'Referral' },
-      { label: 'Consult', value: 'Consult', type: 'Consult' },
-    ]
-  },
-  {
-    title: 'Follow-up',
-    items: [
-      { label: 'Follow-up', value: 'Follow-up', type: 'Follow-up' }
-    ]
-  },
-  {
-    title: 'For Medical Exam',
-    items: [
-      { label: 'For Medical Exam', value: 'Medical Exam', type: 'Medical Exam' }
-    ]
-  }
-];
 
 export function CreateAppointmentModal({ isOpen, onClose }: CreateAppointmentModalProps) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -67,7 +29,7 @@ export function CreateAppointmentModal({ isOpen, onClose }: CreateAppointmentMod
   const [activeDropdown, setActiveDropdown] = useState<'clinic' | 'appointmentType' | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showPatientResults, setShowPatientResults] = useState(false);
-  const timeInputRef = useRef<HTMLInputElement>(null);
+  const datePickerRef = useRef<DatePicker>(null);
 
   const createAppointmentMutation = useCreateAppointment();
 
@@ -108,7 +70,7 @@ export function CreateAppointmentModal({ isOpen, onClose }: CreateAppointmentMod
     >
       <Formik
         initialValues={initialValues}
-        validationSchema={validationSchema}
+        validationSchema={appointmentValidationSchema}
         onSubmit={(values, { setSubmitting, resetForm }) => {
           createAppointmentMutation.mutate(values, {
             onSuccess: () => {
@@ -275,18 +237,15 @@ export function CreateAppointmentModal({ isOpen, onClose }: CreateAppointmentMod
                 <span className="text-base leading-[100%] font-medium text-[#677597]">Time</span>
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-[#051438]">{format(values.scheduledTime, 'd MMM yyyy')}</span>
-                  <input
-                    ref={timeInputRef}
-                    id="time-input"
-                    type="time"
-                    value={format(values.scheduledTime, 'HH:mm')}
-                    onChange={(e) => {
-                      if (!e.target.value) return;
-                      const [hours, minutes] = e.target.value.split(':').map(Number);
-                      const newDate = set(values.scheduledTime, { hours, minutes });
-                      setFieldValue('scheduledTime', newDate);
-                    }}
-                    className="bg-transparent border-none focus:ring-0 p-0 font-semibold text-[#051438] cursor-pointer"
+                  <DatePicker
+                    selected={values.scheduledTime}
+                    onChange={(date) => date && setFieldValue('scheduledTime', date)}
+                    showTimeSelect
+                    showTimeSelectOnly
+                    timeIntervals={15}
+                    dateFormat="HH:mm"
+                    className="bg-transparent border-none focus:ring-0 p-0 font-semibold text-[#051438] cursor-pointer w-[60px] text-right outline-none"
+                    ref={datePickerRef}
                   />
                 </div>
               </div>
@@ -315,13 +274,8 @@ export function CreateAppointmentModal({ isOpen, onClose }: CreateAppointmentMod
                   className="p-1 hover:bg-white/10 rounded cursor-pointer"
                   title="Set time"
                   onClick={() => {
-                    const input = timeInputRef.current;
-                    if (input) {
-                      if (typeof input.showPicker === 'function') {
-                        input.showPicker();
-                      } else {
-                        input.focus();
-                      }
+                    if (datePickerRef.current) {
+                      datePickerRef.current.setOpen(true);
                     }
                   }}
                 >

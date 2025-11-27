@@ -1,6 +1,5 @@
+import { API_BASE } from '@/lib/constants/api';
 import { Appointment, CreateAppointmentInput } from '@/lib/types/appointment';
-
-const API_BASE = '/api';
 
 export const appointmentService = {
   getAll: async (): Promise<Appointment[]> => {

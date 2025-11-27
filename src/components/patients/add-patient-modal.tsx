@@ -1,29 +1,21 @@
 'use client';
 
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import * as Yup from 'yup';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { CreatePatientInput } from '@/lib/types/patient';
 import { useCreatePatient } from '@/lib/hooks/use-patients';
 import toast from 'react-hot-toast';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+import { patientValidationSchema } from '@/lib/schemas/patient';
 
 interface AddPatientModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
 }
-
-const validationSchema = Yup.object({
-  firstName: Yup.string().required('First name is required'),
-  lastName: Yup.string().required('Last name is required'),
-  dateOfBirth: Yup.date().required('Date of birth is required'),
-  gender: Yup.string().oneOf(['Male', 'Female', 'Other'], 'Invalid gender').required('Gender is required'),
-  phoneNumber: Yup.string().required('Phone number is required'),
-  title: Yup.string(),
-  middleName: Yup.string(),
-});
 
 export function AddPatientModal({ isOpen, onClose, onSuccess }: AddPatientModalProps) {
   const createPatientMutation = useCreatePatient();
@@ -49,7 +41,7 @@ export function AddPatientModal({ isOpen, onClose, onSuccess }: AddPatientModalP
     >
       <Formik
         initialValues={initialValues}
-        validationSchema={validationSchema}
+        validationSchema={patientValidationSchema}
         onSubmit={(values, { setSubmitting, resetForm }) => {
           const submissionData = {
             ...values,
@@ -167,12 +159,16 @@ export function AddPatientModal({ isOpen, onClose, onSuccess }: AddPatientModalP
 
               <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
                 <div className="md:col-span-4">
-                  <Field
-                    type="date"
-                    name="dateOfBirth"
-                    placeholder="Date of birth *"
-                    value={values.dateOfBirth instanceof Date ? values.dateOfBirth.toISOString().split('T')[0] : values.dateOfBirth}
-                    className={`w-full min-w-0 px-3 py-2 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D7E3FC] cursor-pointer ${touched.dateOfBirth && errors.dateOfBirth ? 'border-red-500' : 'border-gray-300'}`}
+                  <DatePicker
+                    selected={values.dateOfBirth ? new Date(values.dateOfBirth) : null}
+                    onChange={(date) => setFieldValue('dateOfBirth', date)}
+                    placeholderText="Date of birth *"
+                    className={`w-full px-3 py-2 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D7E3FC] cursor-pointer ${touched.dateOfBirth && errors.dateOfBirth ? 'border-red-500' : 'border-gray-300'}`}
+                    dateFormat="dd/MM/yyyy"
+                    showYearDropdown
+                    scrollableYearDropdown
+                    yearDropdownItemNumber={100}
+                    maxDate={new Date()}
                   />
                   <ErrorMessage name="dateOfBirth" component="div" className="text-red-500 text-xs mt-1" />
 

@@ -1,6 +1,5 @@
+import { API_BASE } from '@/lib/constants/api';
 import { CreatePatientInput, Patient } from '@/lib/types/patient';
-
-const API_BASE = '/api';
 
 export const patientService = {
   getAll: async (): Promise<Patient[]> => {
