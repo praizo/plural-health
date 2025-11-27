@@ -2,6 +2,8 @@ import { AppointmentModel } from '@/lib/db/model/appointment';
 import { CreateAppointmentInput } from '@/lib/types/appointment';
 import { NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
     try {
         const appointments = await AppointmentModel.findAll();

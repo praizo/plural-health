@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PatientModel } from '@/lib/db/model/patient';
 import { CreatePatientInput } from '@/lib/types/patient';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
     try {
         const patients = await PatientModel.findAll();
