@@ -1,12 +1,13 @@
-import { MongoClient } from 'mongodb';
+import { MongoClient, MongoClientOptions } from 'mongodb';
 
 const uri = process.env.MONGODB_URI;
-const options = {
+const options: MongoClientOptions = {
   serverSelectionTimeoutMS: 5000,
   socketTimeoutMS: 45000,
+  maxPoolSize: 10, // Recommended for serverless environments (Vercel)
 };
 
-let client;
+let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
 
 if (!uri) {
@@ -15,6 +16,8 @@ if (!uri) {
   clientPromise = Promise.reject(new Error('Please add your Mongo URI to .env.local'));
 } else {
   if (process.env.NODE_ENV === 'development') {
+    // In development mode, use a global variable so that the value
+    // is preserved across module reloads caused by HMR (Hot Module Replacement).
     const globalWithMongo = global as typeof globalThis & {
       _mongoClientPromise?: Promise<MongoClient>;
     };
@@ -25,6 +28,7 @@ if (!uri) {
     }
     clientPromise = globalWithMongo._mongoClientPromise;
   } else {
+    // In production mode, it's best to not use a global variable.
     client = new MongoClient(uri, options);
     clientPromise = client.connect();
   }
