@@ -1,4 +1,4 @@
-export type AppointmentStatus = 
+export type AppointmentStatus =
   | 'Processing'
   | 'Not arrived'
   | 'Awaiting vitals'
@@ -18,6 +18,7 @@ export interface Appointment {
     hospitalId: string;
     gender: string;
     age: string;
+    isNew?: boolean;
   };
   clinic: string;
   title: string;
@@ -29,6 +30,28 @@ export interface Appointment {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface AppointmentRow {
+  id: string;
+  patient: {
+    name: string;
+    hospitalId: string;
+    gender: string;
+    age: string;
+    avatarColor: string;
+  };
+  isNew?: boolean;
+  hasRecord?: boolean;
+  clinic: {
+    name: string;
+    extra?: number;
+  };
+  walletBalance: number;
+  scheduledTime: string;
+  scheduledDate: string;
+  status: AppointmentStatus;
+}
+
 
 export interface CreateAppointmentInput {
   patientId: string;

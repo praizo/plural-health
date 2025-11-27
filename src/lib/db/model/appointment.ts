@@ -24,7 +24,8 @@ export class AppointmentModel {
         lastName: patient.lastName,
         hospitalId: patient.hospitalId,
         gender: patient.gender,
-        age: age
+        age: age,
+        isNew: patient.isNew
       },
       status: 'Processing' as const,
       amount: this.calculateAppointmentAmount(appointmentData.clinic, appointmentData.appointmentType),
@@ -45,7 +46,10 @@ export class AppointmentModel {
       .sort({ scheduledTime: 1 })
       .toArray();
     
-    return appointments as unknown as Appointment[];
+    return appointments.map(apt => ({
+      ...apt,
+      _id: apt._id.toString()
+    })) as unknown as Appointment[];
   }
 
   static async findById(id: string): Promise<Appointment | null> {
@@ -53,7 +57,9 @@ export class AppointmentModel {
     const db = client.db();
     
     const appointment = await db.collection('appointments').findOne({ _id: new ObjectId(id) });
-    return appointment as Appointment | null;
+    if (!appointment) return null;
+    
+    return { ...appointment, _id: appointment._id.toString() } as unknown as Appointment;
   }
 
   static async findByPatientId(patientId: string): Promise<Appointment[]> {
@@ -65,7 +71,10 @@ export class AppointmentModel {
       .sort({ scheduledTime: -1 })
       .toArray();
     
-    return appointments as unknown as Appointment[];
+    return appointments.map(apt => ({
+      ...apt,
+      _id: apt._id.toString()
+    })) as unknown as Appointment[];
   }
 
   static async updateStatus(id: string, status: Appointment['status']): Promise<Appointment | null> {

@@ -10,8 +10,9 @@ export async function GET(request: NextRequest) {
         const patients = await PatientModel.search(query);
         return NextResponse.json(patients);
     } catch (error) {
+        console.error('Failed to search patients:', error);
         return NextResponse.json(
-            { error: 'Failed to search patients' },
+            { error: 'Failed to search patients', details: error instanceof Error ? error.message : String(error) },
             { status: 500 }
         );
     }

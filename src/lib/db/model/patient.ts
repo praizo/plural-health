@@ -7,7 +7,7 @@ export class PatientModel {
     const client = await clientPromise;
     const db = client.db();
     
-    const hospitalId = `HOSP${Date.now()}${Math.random().toString(36).substr(2, 5)}`.toUpperCase();
+    const hospitalId = `HOSP${Date.now()}${Math.random().toString(12).substr(2, 5)}`.toUpperCase();
     
     const patient = {
       ...patientData,
@@ -25,7 +25,8 @@ export class PatientModel {
     const db = client.db();
     
     const patient = await db.collection('patients').findOne({ _id: new ObjectId(id) });
-    return patient as unknown as Patient | null;
+    if (!patient) return null;
+    return { ...patient, _id: patient._id.toString() } as unknown as Patient;
   }
 
   static async findAll(): Promise<Patient[]> {
@@ -33,7 +34,7 @@ export class PatientModel {
     const db = client.db();
     
     const patients = await db.collection('patients').find().sort({ createdAt: -1 }).toArray();
-    return patients as unknown as Patient[];
+    return patients.map(p => ({ ...p, _id: p._id.toString() })) as unknown as Patient[];
   }
 
   static async search(query: string): Promise<Patient[]> {
@@ -48,6 +49,6 @@ export class PatientModel {
       ]
     }).toArray();
     
-    return patients as unknown as Patient[];
+    return patients.map(p => ({ ...p, _id: p._id.toString() })) as unknown as Patient[];
   }
 }
