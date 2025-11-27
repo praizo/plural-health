@@ -42,9 +42,9 @@ export function Modal({ isOpen, onClose, title, description, children, className
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-[2px] p-2">
-      <div 
+      <div
         ref={overlayRef}
-        className="absolute inset-0" 
+        className="absolute inset-0"
         onClick={onClose}
       />
       <div className={`relative bg-[#EDF0F8] rounded-xl shadow-xl w-full max-h-[90vh] flex flex-col px-4 md:px-10 pb-6 md:pb-10 ${className}`}>
@@ -53,7 +53,7 @@ export function Modal({ isOpen, onClose, title, description, children, className
             <h2 className="text-xl font-bold text-[#051438] leading-[100%]">{title}</h2>
             {description && <p className="text-sm font-semibold leading-[100%] text-[#677597] mt-2">{description}</p>}
           </div>
-          <button 
+          <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors bg-[#DFE2E9] cursor-pointer"
             title="Close modal"
