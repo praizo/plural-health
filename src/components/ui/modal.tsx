@@ -47,7 +47,7 @@ export function Modal({ isOpen, onClose, title, description, children, className
         className="absolute inset-0" 
         onClick={onClose}
       />
-      <div className={`relative bg-[#EDF0F8] rounded-xl shadow-xl w-full max-h-[90vh] flex flex-col px-4 md:px-10 pb-6 md:pb-10 overflow-y-auto custom-scrollbar ${className}`}>
+      <div className={`relative bg-[#EDF0F8] rounded-xl shadow-xl w-full max-h-[90vh] flex flex-col px-4 md:px-10 pb-6 md:pb-10 ${className}`}>
         <div className="flex items-start justify-between px-4 md:px-8   py-8 rounded-t-2xl border-b border-gray-100">
           <div>
             <h2 className="text-xl font-bold text-[#051438] leading-[100%]">{title}</h2>
@@ -61,7 +61,7 @@ export function Modal({ isOpen, onClose, title, description, children, className
             <Image src="/images/x.svg" alt="Close" width={20} height={20} />
           </button>
         </div>
-        <div className=" ">
+        <div className=" overflow-y-auto custom-scrollbar">
           {children}
         </div>
       </div>
